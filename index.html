@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Subject Quiz Game</title>
+  <style>
+    body {
+      font-family: 'Courier New', Courier, monospace, sans-serif;
+      text-align: center;
+      background-color: #f0f8ff;
+      margin: 0;
+    }
+
+    /* Top subject bar */
+    .subject-bar {
+      background-color: #333;
+      color: white;
+      display: flex;
+      justify-content: center;
+      padding: 10px;
+      gap: 15px;
+    }
+
+    .subject-bar button {
+      background: #4CAF50;
+      border: none;
+      padding: 10px 15px;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .subject-bar button:hover {
+      background: #45a049;
+    }
+
+    /* Math emoji background */
+    body {
+      background-image: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 40px,
+        rgba(255, 255, 255, 0.6) 40px,
+        rgba(255, 255, 255, 0.6) 80px
+      ),
+      url("data:image/svg+xml;utf8,<svg xmlns='' width='200' height='200'><text x='10' y='40' font-size='40'>🧮</text><text x='70' y='40' font-size='40'>➕</text><text x='130' y='40' font-size='40'>➖</text><text x='10' y='120' font-size='40'>✖️</text><text x='70' y='120' font-size='40'>➗</text><text x='130' y='120' font-size='40'>🔢</text></svg>");
+      background-size: 200px 200px;
+    }
+
+    .box-container {
+      display: grid;
+      grid-template-columns: repeat(5, 100px);
+      gap: 15px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .box {
+      width: 100px;
+      height: 100px;
+      background-color: #ffcc66;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 10px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+      transition: transform 0.2s;
+    }
+
+    .box:hover {
+      transform: scale(1.1);
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 20px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+    }
+
+    #homeMenu {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Subject Selection Bar -->
+<div class="subject-bar" id="subjectBar" style="display:none;">
+  <button onclick="setSubject('math')">Math</button>
+  <button onclick="setSubject('filipino')">Filipino</button>
+  <button onclick="setSubject('science')">Science</button>
+  <button onclick="setSubject('english')">English</button>
+</div>
+
+<!-- Home Menu -->
+<div id="homeMenu">
+  <h1>🧮 Welcome to Jacob's Subject Quiz Game 🧮</h1>
+  <p>Select your subject and test your brain!</p>
+  <button onclick="startGame()">Start Game</button>
+</div>
+
+<!-- Game Content -->
+<div id="gameContent" style="display:none;">
+  <h1 id="subjectTitle">Math Questions</h1>
+  <div class="box-container" id="boxContainer"></div>
+  <button onclick="goBack()">⬅ Back to Menu</button>
+</div>
+
+<script>
+  // Questions for each subject
+  const questionSets = {
+    math: [
+      { q: "5 + 7 =", a: "12" },
+      { q: "9 × 6 =", a: "54" },
+      { q: "15 - 4 =", a: "11" },
+      { q: "8 ÷ 2 =", a: "4" },
+      { q: "12 + 14 =", a: "26" },
+      { q: "7 × 7 =", a: "49" },
+      { q: "100 - 45 =", a: "55" },
+      { q: "81 ÷ 9 =", a: "9" },
+      { q: "6 × 8 =", a: "48" },
+      { q: "50 + 25 =", a: "75" }
+    ],
+    filipino: [
+      { q: "Ano ang pambansang wika ng Pilipinas?", a: "Filipino" },
+      { q: "Ano ang kabaligtaran ng 'mataas'?", a: "mababa" },
+      { q: "Ibaybay ang salitang 'paaralan'.", a: "paaralan" },
+      { q: "Ano ang ibig sabihin ng 'masaya'?", a: "maligaya" },
+      { q: "Kasingkahulugan ng 'maganda'?", a: "maliwanag" },
+      { q: "Kabaligtaran ng 'mainit'?", a: "malamig" },
+      { q: "Ano ang salitang ugat ng 'pinag-aralan'?", a: "aral" },
+      { q: "Ano ang ibig sabihin ng 'kaibigan'?", a: "friend" },
+      { q: "Kasingkahulugan ng 'malaki'?", a: "malawak" },
+      { q: "Kabaligtaran ng 'tama'?", a: "mali" }
+    ],
+    science: [
+      { q: "What planet is known as the Red Planet?", a: "Mars" },
+      { q: "What gas do humans need to breathe?", a: "Oxygen" },
+      { q: "What is the center of an atom called?", a: "Nucleus" },
+      { q: "What force pulls objects to Earth?", a: "Gravity" },
+      { q: "What is H2O?", a: "Water" },
+      { q: "What planet is closest to the Sun?", a: "Mercury" },
+      { q: "What part of the plant makes food?", a: "Leaf" },
+      { q: "What organ pumps blood?", a: "Heart" },
+      { q: "What is the boiling point of water in Celsius?", a: "100" },
+      { q: "What galaxy is Earth in?", a: "Milky Way" }
+    ],
+    english: [
+      { q: "What is the past tense of 'run'?", a: "ran" },
+      { q: "What is a synonym for 'happy'?", a: "joyful" },
+      { q: "Fill in: 'She ___ to the store.'", a: "went" },
+      { q: "What is the opposite of 'big'?", a: "small" },
+      { q: "What is a noun?", a: "person place thing" },
+      { q: "What is an adjective?", a: "describing word" },
+      { q: "Plural of 'child'?", a: "children" },
+      { q: "What is the opposite of 'hot'?", a: "cold" },
+      { q: "What is the past tense of 'eat'?", a: "ate" },
+      { q: "What is a synonym for 'fast'?", a: "quick" }
+    ]
+  };
+
+  let currentSubject = 'math';
+
+  function setSubject(subject) {
+    currentSubject = subject;
+    document.getElementById("subjectTitle").innerText = subject.charAt(0).toUpperCase() + subject.slice(1) + " Questions";
+    loadBoxes();
+  }
+
+  function startGame() {
+    document.getElementById("homeMenu").style.display = "none";
+    document.getElementById("subjectBar").style.display = "flex";
+    document.getElementById("gameContent").style.display = "block";
+    loadBoxes();
+  }
+
+  function goBack() {
+    document.getElementById("homeMenu").style.display = "flex";
+    document.getElementById("subjectBar").style.display = "none";
+    document.getElementById("gameContent").style.display = "none";
+  }
+
+  function loadBoxes() {
+    const boxContainer = document.getElementById("boxContainer");
+    boxContainer.innerHTML = "";
+    const questions = questionSets[currentSubject];
+    for (let i = 0; i < questions.length; i++) {
+      const box = document.createElement("div");
+      box.className = "box";
+      box.innerText = "Box " + (i + 1);
+      box.onclick = () => askQuestion(i);
+      boxContainer.appendChild(box);
+    }
+  }
+
+  function askQuestion(index) {
+    const question = questionSets[currentSubject][index];
+    let userAnswer = prompt(question.q);
+    if (userAnswer === null) return;
+    if (userAnswer.trim().toLowerCase() === question.a.toLowerCase()) {
+      alert("✅ Correct!");
+    } else {
+      alert("❌ Wrong! The correct answer is: " + question.a);
+    }
+  }
+</script>
+
+</body>
+</html>
